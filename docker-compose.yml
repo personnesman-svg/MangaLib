@@ -1,0 +1,68 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      APP_NAME: MangaPlatform
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY:?Set APP_KEY in .env}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-manga}
+      DB_USERNAME: ${DB_USERNAME:-manga}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      FILESYSTEM_DISK: public
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost,localhost:5173,localhost:8080,127.0.0.1,127.0.0.1:5173,127.0.0.1:8080}
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+      SESSION_SAME_SITE: lax
+    volumes:
+      - manga_uploads:/var/www/html/storage/app/public
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [app]
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-manga}
+      MYSQL_USER: ${DB_USERNAME:-manga}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [app]
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    expose: ["80"]
+    volumes:
+      - manga_uploads:/var/www/html/storage/app/public:ro
+    depends_on: [backend]
+    networks: [app]
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    name: ${VOLUME_PREFIX:-manga-platform}_mysql_data
+  manga_uploads:
+    name: ${VOLUME_PREFIX:-manga-platform}_manga_uploads
+
+networks:
+  app:
+    driver: bridge

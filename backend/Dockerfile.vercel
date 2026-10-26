@@ -17,7 +17,8 @@ COPY routes/web.php /var/www/html/routes/web.php
 COPY routes/console.php /var/www/html/routes/console.php
 
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
-    --ignore-platform-req=ext-mongodb
+    --ignore-platform-req=ext-mongodb \
+    && rm -f .env
 
 FROM dunglas/frankenphp:1-php8.4-alpine
 

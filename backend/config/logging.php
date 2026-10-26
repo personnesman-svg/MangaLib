@@ -1,9 +1,9 @@
 <?php
 
-use Monolog\\Handler\\NullHandler;
-use Monolog\\Handler\\StreamHandler;
-use Monolog\\Handler\\SyslogUdpHandler;
-use Monolog\\Processor\\PsrLogMessageProcessor;
+use Monolog\Handler\NullHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
     // Vercel captures stderr in Runtime Logs. Keep this as the default so

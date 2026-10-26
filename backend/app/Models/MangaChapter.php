@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class MangaChapter extends Model
+class MangaChapter extends BaseModel
 {
     protected $fillable = ['manga_title_id', 'number', 'name', 'is_published', 'published_at'];
 

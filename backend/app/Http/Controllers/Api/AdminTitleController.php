@@ -159,7 +159,7 @@ class AdminTitleController extends Controller
         return response()->noContent();
     }
 
-    private function validateTitle(Request $request, ?int $id = null): array
+    private function validateTitle(Request $request, ?string $id = null): array
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:190'],

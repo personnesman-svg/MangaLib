@@ -2,7 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "frontend": {
-      "root": "frontend"
+      "root": "frontend",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
     },
     "backend": {
       "root": "backend",
@@ -11,11 +17,41 @@
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": { "service": "backend" } },
-    { "source": "/sanctum/(.*)", "destination": { "service": "backend" } },
-    { "source": "/storage/(.*)", "destination": { "service": "backend" } },
-    { "source": "/up", "destination": { "service": "backend" } },
-    { "source": "/_backend-health", "destination": { "service": "backend" } },
-    { "source": "/(.*)", "destination": { "service": "frontend" } }
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/sanctum/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/storage/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/up",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/_backend-health",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
   ]
 }

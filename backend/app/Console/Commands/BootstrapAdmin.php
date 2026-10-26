@@ -9,13 +9,17 @@ use Illuminate\Support\Facades\Hash;
 class BootstrapAdmin extends Command
 {
     protected $signature = 'manga:bootstrap-admin';
-    protected $description = 'Create or synchronize the initial administrator from environment variables';
+    protected $description = 'Create the initial administrator and optionally reset an existing administrator password';
 
     public function handle(): int
     {
         $email = mb_strtolower(trim((string) env('MANGA_ADMIN_EMAIL', '')));
         $password = (string) env('MANGA_ADMIN_PASSWORD', '');
         $name = trim((string) env('MANGA_ADMIN_NAME', 'MangaLib Admin'));
+        $resetExistingPassword = filter_var(
+            (string) env('MANGA_ADMIN_RESET_PASSWORD', 'false'),
+            FILTER_VALIDATE_BOOLEAN
+        );
 
         if ($email === '' || $password === '') {
             $this->line('Admin bootstrap skipped: MANGA_ADMIN_EMAIL or MANGA_ADMIN_PASSWORD is not set.');
@@ -29,14 +33,18 @@ class BootstrapAdmin extends Command
 
         $user = User::firstOrNew(['email' => $email]);
         $created = !$user->exists;
-        $changed = false;
 
         if ($created) {
             $user->name = $name !== '' ? $name : 'MangaLib Admin';
+            $user->password = Hash::make($password);
+            $user->role = 'admin';
             $user->email_verified_at = now();
-            $changed = true;
+            $user->save();
+            $this->info('Initial administrator created.');
+            return self::SUCCESS;
         }
 
+        $changed = false;
         if (($user->role ?? null) !== 'admin') {
             $user->role = 'admin';
             $changed = true;
@@ -44,10 +52,7 @@ class BootstrapAdmin extends Command
 
         $currentHash = (string) ($user->getAuthPassword() ?? '');
         $passwordMatches = $currentHash !== '' && Hash::check($password, $currentHash);
-
-        // The configured environment password is the recovery source of truth.
-        // This also repairs an admin created earlier with a different password.
-        if (!$passwordMatches) {
+        if ($resetExistingPassword && !$passwordMatches) {
             $user->password = Hash::make($password);
             $changed = true;
         }
@@ -56,10 +61,10 @@ class BootstrapAdmin extends Command
             $user->save();
         }
 
-        if ($created) {
-            $this->info('Initial administrator created.');
+        if ($resetExistingPassword && !$passwordMatches) {
+            $this->info('Configured administrator password reset from environment as explicitly requested.');
         } elseif (!$passwordMatches) {
-            $this->info('Configured administrator password synchronized from environment.');
+            $this->line('Existing administrator password left unchanged. Set MANGA_ADMIN_RESET_PASSWORD=true temporarily to reset it.');
         } elseif ($changed) {
             $this->info('Configured administrator account promoted to admin.');
         } else {

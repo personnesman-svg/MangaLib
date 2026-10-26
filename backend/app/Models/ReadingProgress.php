@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ReadingProgress extends Model
+class ReadingProgress extends BaseModel
 {
     protected $fillable = ['user_id', 'manga_title_id', 'manga_chapter_id', 'page_number', 'last_read_at'];
     protected function casts(): array { return ['last_read_at' => 'datetime']; }

@@ -27,7 +27,13 @@ class MangaTitleController extends Controller
             $query->where(function ($builder) use ($term, $validated) {
                 $builder->where('name', 'like', "%{$term}%")
                     ->orWhere('original_name', 'like', "%{$term}%");
-                if (!empty($validated['search'])) $builder->orWhereJsonContains('alternative_names', $validated['search']);
+                if (!empty($validated['search'])) {
+                    if (in_array(env('DB_CONNECTION', 'mongodb'), ['mysql', 'sqlite'], true)) {
+                        $builder->orWhereJsonContains('alternative_names', $validated['search']);
+                    } else {
+                        $builder->orWhere('alternative_names', $validated['search']);
+                    }
+                }
             });
         }
         if (!empty($validated['status'])) $query->where('status', $validated['status']);

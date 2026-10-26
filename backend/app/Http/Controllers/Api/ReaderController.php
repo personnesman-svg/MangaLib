@@ -20,7 +20,7 @@ class ReaderController extends Controller
         $resumePage = 1;
         if ($request->user()) {
             $progress = $request->user()->readingProgress()->where('manga_title_id', $chapter->manga_title_id)->first();
-            if (!$progress || (int) $progress->manga_chapter_id !== (int) $chapter->id) {
+            if (!$progress || (string) $progress->manga_chapter_id !== (string) $chapter->id) {
                 $progress = $request->user()->readingProgress()->updateOrCreate(
                     ['manga_title_id' => $chapter->manga_title_id],
                     ['manga_chapter_id' => $chapter->id, 'page_number' => 1, 'last_read_at' => now()],
@@ -44,7 +44,7 @@ class ReaderController extends Controller
     public function progress(Request $request)
     {
         $data = $request->validate([
-            'chapter_id' => ['required', 'integer', 'exists:manga_chapters,id'],
+            'chapter_id' => ['required', 'string', 'max:24', 'exists:manga_chapters,id'],
             'page_number' => ['required', 'integer', 'min:1'],
         ]);
         $chapter = MangaChapter::whereKey($data['chapter_id'])->where('is_published', true)->firstOrFail();

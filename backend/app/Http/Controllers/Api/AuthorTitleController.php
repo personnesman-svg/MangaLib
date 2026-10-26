@@ -109,10 +109,10 @@ class AuthorTitleController extends Controller
 
     private function authorizeTitle(Request $request, MangaTitle $title): void
     {
-        abort_unless((int) $title->owner_user_id === (int) $request->user()->id, 404, 'Тайтл не найден.');
+        abort_unless((string) $title->owner_user_id === (string) $request->user()->id, 404, 'Тайтл не найден.');
     }
 
-    private function validateTitle(Request $request, ?int $id = null): array
+    private function validateTitle(Request $request, ?string $id = null): array
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:190'],

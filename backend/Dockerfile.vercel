@@ -1,0 +1,40 @@
+FROM composer:2 AS laravel-build
+
+WORKDIR /var/www/html
+
+RUN composer create-project laravel/laravel:^12.0 . --no-interaction --prefer-dist \
+    && php artisan install:api --without-migration-prompt \
+    && composer require mongodb/laravel-mongodb:^5.11 league/flysystem-gridfs:^3.0 \
+        --no-interaction --prefer-dist --ignore-platform-req=ext-mongodb
+
+COPY app/ /var/www/html/app/
+COPY bootstrap/app.php /var/www/html/bootstrap/app.php
+COPY bootstrap/providers.php /var/www/html/bootstrap/providers.php
+COPY config/database.php /var/www/html/config/database.php
+COPY config/filesystems.php /var/www/html/config/filesystems.php
+COPY config/session.php /var/www/html/config/session.php
+COPY config/logging.php /var/www/html/config/logging.php
+COPY routes/api.php /var/www/html/routes/api.php
+COPY routes/web.php /var/www/html/routes/web.php
+COPY routes/console.php /var/www/html/routes/console.php
+
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
+    --ignore-platform-req=ext-mongodb \
+    && rm -f .env
+
+FROM dunglas/frankenphp:1-php8.4-alpine
+
+RUN install-php-extensions mongodb intl zip bcmath opcache xml curl exif fileinfo
+
+WORKDIR /var/www/html
+COPY --from=laravel-build /var/www/html /var/www/html
+COPY Caddyfile.vercel /etc/caddy/Caddyfile
+COPY entrypoint.vercel.sh /usr/local/bin/entrypoint-vercel
+
+RUN chmod +x /usr/local/bin/entrypoint-vercel \
+    && mkdir -p storage/app/private storage/app/public storage/framework/cache/data \
+    storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 80
+CMD ["/usr/local/bin/entrypoint-vercel"]

@@ -22,7 +22,7 @@ class CommentController extends Controller
         abort_unless($title->is_published, 404);
         $data = $request->validate([
             'content' => ['required', 'string', 'min:1', 'max:3000'],
-            'parent_id' => ['nullable', 'integer', 'exists:comments,id'],
+            'parent_id' => ['nullable', 'string', 'max:24', 'exists:comments,id'],
         ]);
         if (!empty($data['parent_id'])) {
             $parent = Comment::whereKey($data['parent_id'])->where('manga_title_id', $title->id)->whereNull('parent_id')->where('is_visible', true)->firstOrFail();

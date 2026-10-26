@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Genre extends Model
+class Genre extends BaseModel
 {
     protected $fillable = ['name', 'slug'];
 
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(MangaTitle::class, 'genre_manga_title');
+        return $this->belongsToMany(
+            MangaTitle::class,
+            in_array(env('DB_CONNECTION', 'mongodb'), ['mysql', 'sqlite'], true) ? 'genre_manga_title' : null
+        );
     }
 }

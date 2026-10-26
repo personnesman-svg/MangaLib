@@ -83,11 +83,11 @@ class AuthorChapterController extends Controller
 
     private function authorizeTitle(Request $request, MangaTitle $title): void
     {
-        abort_unless((int) $title->owner_user_id === (int) $request->user()->id, 404, 'Тайтл не найден.');
+        abort_unless((string) $title->owner_user_id === (string) $request->user()->id, 404, 'Тайтл не найден.');
     }
 
     private function authorizeChapter(Request $request, MangaChapter $chapter): void
     {
-        abort_unless((int) $chapter->title()->value('owner_user_id') === (int) $request->user()->id, 404, 'Глава не найдена.');
+        abort_unless((string) $chapter->title()->value('owner_user_id') === (string) $request->user()->id, 404, 'Глава не найдена.');
     }
 }

@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AuthorApplication extends Model
+class AuthorApplication extends BaseModel
 {
     protected $fillable = [
         'user_id', 'pen_name', 'portfolio_url', 'social_links', 'motivation',

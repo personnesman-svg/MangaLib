@@ -15,7 +15,13 @@ class AdminAuthorApplicationController extends Controller
         $status = $request->query('status', 'pending');
         abort_unless(in_array($status, ['pending', 'approved', 'rejected', 'all'], true), 422, 'Invalid application status.');
 
-        $query = AuthorApplication::query()->with(['user:id,name,email', 'reviewer:id,name'])->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")->latest();
+        $query = AuthorApplication::query()->with(['user:id,name,email', 'reviewer:id,name']);
+        if (in_array(env('DB_CONNECTION', 'mongodb'), ['mysql', 'sqlite'], true)) {
+            $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END");
+        } else {
+            $query->orderBy('status');
+        }
+        $query->latest();
         if ($status !== 'all') $query->where('status', $status);
 
         $perPage = min(max((int) $request->query('per_page', 30), 1), 100);

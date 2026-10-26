@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Comment extends Model
+class Comment extends BaseModel
 {
     protected $fillable = ['user_id', 'manga_title_id', 'parent_id', 'content', 'is_visible'];
     protected function casts(): array { return ['is_visible' => 'boolean']; }

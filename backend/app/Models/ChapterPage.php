@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ChapterPage extends Model
+class ChapterPage extends BaseModel
 {
     protected $fillable = ['manga_chapter_id', 'page_number', 'image_path'];
 

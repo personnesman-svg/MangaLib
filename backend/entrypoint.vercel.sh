@@ -5,11 +5,8 @@ set -eu
 export LOG_CHANNEL="${LOG_CHANNEL:-stderr}"
 export LOG_LEVEL="${LOG_LEVEL:-info}"
 
-# Laravel's database session driver works with the MongoDB connection.
-# Normalize the earlier deployment value "mongodb" to the supported driver.
-if [ "${SESSION_DRIVER:-database}" = "mongodb" ]; then
-    export SESSION_DRIVER="database"
-fi
+# Laravel MongoDB v5.4+ provides a dedicated MongoDB session driver.
+export SESSION_DRIVER="${SESSION_DRIVER:-mongodb}"
 export SESSION_CONNECTION="${SESSION_CONNECTION:-mongodb}"
 
 if [ -z "${APP_KEY:-}" ]; then

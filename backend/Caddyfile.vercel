@@ -1,0 +1,9 @@
+{
+    auto_https off
+}
+
+:{$PORT:80} {
+    encode zstd gzip
+    root * /var/www/html/public
+    php_server
+}

@@ -26,10 +26,13 @@ RUN install-php-extensions mongodb intl zip bcmath opcache xml curl exif fileinf
 WORKDIR /var/www/html
 COPY --from=laravel-build /var/www/html /var/www/html
 COPY Caddyfile.vercel /etc/caddy/Caddyfile
+COPY entrypoint.vercel.sh /usr/local/bin/entrypoint-vercel
 
-RUN mkdir -p storage/app/private storage/app/public storage/framework/cache/data \
+RUN chmod +x /usr/local/bin/entrypoint-vercel \
+    && sed -i "s/env('SESSION_DRIVER', 'database')/env('SESSION_DRIVER', 'mongodb')/" config/session.php \
+    && mkdir -p storage/app/private storage/app/public storage/framework/cache/data \
     storage/framework/sessions storage/framework/views bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
-CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
+CMD ["/usr/local/bin/entrypoint-vercel"]

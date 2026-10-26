@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\\Console\\Commands;
 
-use App\Models\User;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
+use App\\Models\\User;
+use Illuminate\\Console\\Command;
+use Illuminate\\Support\\Facades\\Hash;
 
 class BootstrapAdmin extends Command
 {
     protected $signature = 'manga:bootstrap-admin';
-    protected $description = 'Create the initial administrator when bootstrap environment variables are set';
+    protected $description = 'Create or synchronize the initial administrator from environment variables';
 
     public function handle(): int
     {
@@ -28,22 +28,42 @@ class BootstrapAdmin extends Command
         }
 
         $user = User::firstOrNew(['email' => $email]);
-        if (!$user->exists) {
+        $created = !$user->exists;
+        $changed = false;
+
+        if ($created) {
             $user->name = $name !== '' ? $name : 'MangaLib Admin';
-            $user->password = Hash::make($password);
-            $user->role = 'admin';
             $user->email_verified_at = now();
-            $user->save();
-            $this->info('Initial administrator created.');
-            return self::SUCCESS;
+            $changed = true;
         }
 
-        if ($user->role !== 'admin') {
+        if (($user->role ?? null) !== 'admin') {
             $user->role = 'admin';
+            $changed = true;
+        }
+
+        $currentHash = (string) ($user->getAuthPassword() ?? '');
+        $passwordMatches = $currentHash !== '' && Hash::check($password, $currentHash);
+
+        // The configured environment password is the recovery source of truth.
+        // This also repairs an admin created earlier with a different password.
+        if (!$passwordMatches) {
+            $user->password = Hash::make($password);
+            $changed = true;
+        }
+
+        if ($changed) {
             $user->save();
+        }
+
+        if ($created) {
+            $this->info('Initial administrator created.');
+        } elseif (!$passwordMatches) {
+            $this->info('Configured administrator password synchronized from environment.');
+        } elseif ($changed) {
             $this->info('Configured administrator account promoted to admin.');
         } else {
-            $this->line('Configured administrator already exists; its password was not changed.');
+            $this->line('Configured administrator is ready; environment password matches.');
         }
 
         return self::SUCCESS;

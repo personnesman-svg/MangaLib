@@ -12,6 +12,8 @@ COPY bootstrap/app.php /var/www/html/bootstrap/app.php
 COPY bootstrap/providers.php /var/www/html/bootstrap/providers.php
 COPY config/database.php /var/www/html/config/database.php
 COPY config/filesystems.php /var/www/html/config/filesystems.php
+COPY config/session.php /var/www/html/config/session.php
+COPY config/logging.php /var/www/html/config/logging.php
 COPY routes/api.php /var/www/html/routes/api.php
 COPY routes/web.php /var/www/html/routes/web.php
 COPY routes/console.php /var/www/html/routes/console.php
@@ -30,7 +32,6 @@ COPY Caddyfile.vercel /etc/caddy/Caddyfile
 COPY entrypoint.vercel.sh /usr/local/bin/entrypoint-vercel
 
 RUN chmod +x /usr/local/bin/entrypoint-vercel \
-    && sed -i "s/env('SESSION_DRIVER', 'database')/env('SESSION_DRIVER', 'mongodb')/" config/session.php \
     && mkdir -p storage/app/private storage/app/public storage/framework/cache/data \
     storage/framework/sessions storage/framework/views bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache

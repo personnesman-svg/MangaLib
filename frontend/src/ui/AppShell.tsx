@@ -12,7 +12,7 @@ export function AppShell() {
   const [search, setSearch] = useState(params.get('search') ?? '');
   useEffect(() => setSearch(params.get('search') ?? ''), [params]);
   const { user, logout } = useAuth();
-  async function handleLogout() { try { await logout(); message.success('Ты вышел из аккаунта.'); navigate('/'); } catch { message.error('Не удалось выйти.'); } }
+  async function handleLogout() { try { await logout(); message.success('Ты вышел из аккаунта.'); navigate('/'); } catch { message.error('Не удалось退出.'); } }
   const menuItems = [
     ...(user ? [{ key: 'library', icon: <HeartOutlined />, label: 'Моя библиотека', onClick: () => navigate('/library') }] : []),
     ...(user?.role === 'user' ? [{ key: 'author-application', icon: <FormOutlined />, label: 'Стать автором', onClick: () => navigate('/author') }] : []),
@@ -23,7 +23,11 @@ export function AppShell() {
   return <Layout className="app-layout">
     <Header className="site-header"><div className="header-inner">
       <button className="brand" onClick={() => navigate('/')} aria-label="На главную"><BookOutlined /><span>MANGA<span className="brand-accent">LIB</span></span></button>
-      <Menu theme="dark" mode="horizontal" selectable={false} className="top-menu" items={[{ key: 'catalog', label: 'Каталог', onClick: () => navigate('/') }]} />
+      <Menu theme="dark" mode="horizontal" selectable={false} className="top-menu" items={[
+        { key: 'home', label: 'Главное', onClick: () => navigate('/') },
+        { key: 'popular', label: 'Популярные', onClick: () => navigate('/?sort=views') },
+        { key: 'catalog', label: 'Каталог', onClick: () => navigate('/') }
+      ]} />
       <Input className="header-search" allowClear value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Поиск по каталогу" prefix={<SearchOutlined />} onPressEnter={() => navigate(search.trim() ? `/?search=${encodeURIComponent(search.trim())}` : '/')} />
       {user ? <Dropdown menu={{ items: menuItems }} placement="bottomRight"><Button className="account-button"><Avatar size="small" icon={<UserOutlined />} /> <span className="account-name">{user.name}</span></Button></Dropdown> : <Space><Link to="/login"><Button>Войти</Button></Link><Link to="/login?mode=register"><Button type="primary">Регистрация</Button></Link></Space>}
     </div></Header>

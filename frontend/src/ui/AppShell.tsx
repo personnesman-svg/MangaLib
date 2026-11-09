@@ -12,7 +12,7 @@ export function AppShell() {
   const [search, setSearch] = useState(params.get('search') ?? '');
   useEffect(() => setSearch(params.get('search') ?? ''), [params]);
   const { user, logout } = useAuth();
-  async function handleLogout() { try { await logout(); message.success('Ты вышел из аккаунта.'); navigate('/'); } catch { message.error('Не удалось退出.'); } }
+  async function handleLogout() { try { await logout(); message.success('Ты вышел из аккаунта.'); navigate('/'); } catch { message.error('Не удалось выйти.'); } }
   const menuItems = [
     ...(user ? [{ key: 'library', icon: <HeartOutlined />, label: 'Моя библиотека', onClick: () => navigate('/library') }] : []),
     ...(user?.role === 'user' ? [{ key: 'author-application', icon: <FormOutlined />, label: 'Стать автором', onClick: () => navigate('/author') }] : []),
